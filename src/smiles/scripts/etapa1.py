@@ -48,11 +48,11 @@ labels_fenotipo = dataframe.groupby('Phenotype').size().index
 print(dataframe.groupby('Phenotype').size())
 
 
-# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-# ax1.pie(activity, labels=labels_activity, autopct='%1.1f%%', startangle=90)
-# ax1.set_title('PUBCHEM_Activity_Outcome')
-# ax2.pie(fenotipo, labels=labels_fenotipo, autopct='%1.1f%%', startangle=360)
-# ax2.set_title('Phenotype')
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+ax1.pie(activity, labels=labels_activity, autopct='%1.1f%%', startangle=90)
+ax1.set_title('PUBCHEM_Activity_Outcome')
+ax2.pie(fenotipo, labels=labels_fenotipo, autopct='%1.1f%%', startangle=360)
+ax2.set_title('Phenotype')
 # plt.show()
 
 
@@ -86,7 +86,9 @@ ax7.boxplot(act7)
 ax7.set_title('Activity at 9.037 uM')
 ax8.boxplot(act8)
 ax8.set_title('Activity at 46.23 uM')
-plt.show()
+# plt.show()
+
+
 
 
 
