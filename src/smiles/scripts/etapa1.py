@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
+# import os
 from scipy import stats
-# import statsmodels.api as sm
+import statsmodels.api as sm
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -11,10 +12,17 @@ import missingno as msno
 import seaborn as sns
 from standardizer.CustomStandardizer import CustomStandardizer
 from loaders.Loaders import CSVLoader
+import sys
+sys.path.append('CODE_SIB')
+
+# DIR = os.path.dirname(os.path.realpath('.'))
+# file = os.path.join(DIR, 'dataset/TDP1_activity_dataset.csv')
+
 
 # CARREGAR O DATASET
-file = 'C:/Users/rafes/Documents/GitHub/SIB_SMILES/src/smiles/dataset/TDP1_activity_dataset.csv'
-dataframe = pd.read_csv(file, sep=',', dtype={'Excluded_Points': str, 'Compound QC': str, 'smiles': str})  # definir types para nao dar erros
+dataframe = pd.read_csv('../dataset/TDP1_activity_dataset.csv', sep=',')  # definir types para nao dar erros
+
+# dataframe.to_csv(f"{DIR}/dataset/decente.csv")
 
 # ANALISE SIMPLES
 print(dataframe.size)
@@ -31,94 +39,97 @@ print(dataframe.isna().sum().sum())
 print(dataframe.isna().sum())
 
 #Ver o numero de Nan no dataset
-msno.bar(dataframe,  sort="ascending")
+msno.bar(dataframe, sort="ascending")
+plt.show()
 
 #dataframe = dataframe.dropna(axis=1, how='all')  # da drop de todas as colunas que contenham apenas NAs
 
-# APAGAR FEATURES ESPECIFICAS
-del dataframe['PUBCHEM_ACTIVITY_URL']  # drop de colunas desnecessarias
-del dataframe['Compound QC']
-# todo questionar sobre colunas CID e SID / apagou algumas colunas das ativiades
-print(dataframe.shape)
-print(dataframe.columns)
-
-
-# ANALISE GRAFICA
-# Pie charts activity_outcome
-activity = dataframe.groupby('PUBCHEM_ACTIVITY_OUTCOME').size()
-labels_activity = dataframe.groupby('PUBCHEM_ACTIVITY_OUTCOME').size().index
-print(dataframe.groupby('PUBCHEM_ACTIVITY_OUTCOME').size())
-
-# Pie charts phenotype
-fenotipo = dataframe.groupby('Phenotype').size()
-labels_fenotipo = dataframe.groupby('Phenotype').size().index
-print(dataframe.groupby('Phenotype').size())
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-ax1.pie(activity, labels=labels_activity, autopct='%1.1f%%', startangle=90)
-ax1.set_title('PUBCHEM_Activity_Outcome')
-ax2.pie(fenotipo, labels=labels_fenotipo, autopct='%1.1f%%', startangle=360)
-ax2.set_title('Phenotype')
-#plt.show()
-
-
-plt.subplots(figsize=(10, 10))
-sns.set(font_scale=1.4)
-plt.title("Activity at 46.23 uM", fontsize=25)
-sns.boxplot(y="Activity at 46.23 uM",
-            data=dataframe, palette="Set3")
-plt.show()
-
-plt.subplots(figsize=(10, 10))
-sns.set(font_scale=1.4)
-plt.title("Activity at 0.00299 uM", fontsize=25)
-sns.boxplot(y="Activity at 0.00299 uM",
-            data=dataframe, palette="Set3")
-plt.show()
-
-plt.subplots(figsize=(10, 10))
-sns.set(font_scale=1.4)
-plt.title("Activity at 0.363 uM", fontsize=25)
-sns.boxplot(y="Activity at 0.363 uM",
-            data=dataframe, palette="Set3")
-plt.show()
-
-plt.subplots(figsize=(10, 10))
-sns.set(font_scale=1.4)
-plt.title("Activity at 9.037 uM", fontsize=25)
-sns.boxplot(y="Activity at 9.037 uM",
-            data=dataframe, palette="Set3")
-plt.show()
-
-plt.subplots(figsize=(10, 10))
-sns.set(font_scale=1.4)
-plt.title("Activity at 1.849 uM", fontsize=25)
-sns.boxplot(y="Activity at 1.849 uM",
-            data=dataframe, palette="Set3")
-plt.show()
-
-
-def standardize(dataset, id_field, mols_field, class_field):
-    loader = CSVLoader(dataset,
-                       id_field=id_field,
-                       mols_field=mols_field,
-                       labels_fields=class_field)
-
-    dataset = loader.create_dataset()
-
-    standardisation_params = {
-        'REMOVE_ISOTOPE': True,
-        'NEUTRALISE_CHARGE': True,
-        'REMOVE_STEREO': False,
-        'KEEP_BIGGEST': True,
-        'ADD_HYDROGEN': False,
-        'KEKULIZE': True,
-        'NEUTRALISE_CHARGE_LATE': True}
-
-    CustomStandardizer(params=standardisation_params).standardize(dataset)
-
-    return dataset
-dataframe = standardize(file, "PUBCHEM_CID", "smiles", "PUBCHEM_ACTIVITY_OUTCOME")
+# # APAGAR FEATURES ESPECIFICAS
+# del dataframe['PUBCHEM_ACTIVITY_URL']  # drop de colunas desnecessarias
+# del dataframe['Compound QC']
+# # todo questionar sobre colunas CID e SID / apagou algumas colunas das ativiades
+# print(dataframe.shape)
+# print(dataframe.columns)
+#
+#
+# # ANALISE GRAFICA
+# # Pie charts activity_outcome
+# activity = dataframe.groupby('PUBCHEM_ACTIVITY_OUTCOME').size()
+# labels_activity = dataframe.groupby('PUBCHEM_ACTIVITY_OUTCOME').size().index
+# print(dataframe.groupby('PUBCHEM_ACTIVITY_OUTCOME').size())
+#
+# # Pie charts phenotype
+# fenotipo = dataframe.groupby('Phenotype').size()
+# labels_fenotipo = dataframe.groupby('Phenotype').size().index
+# print(dataframe.groupby('Phenotype').size())
+#
+# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+# ax1.pie(activity, labels=labels_activity, autopct='%1.1f%%', startangle=90)
+# ax1.set_title('PUBCHEM_Activity_Outcome')
+# ax2.pie(fenotipo, labels=labels_fenotipo, autopct='%1.1f%%', startangle=360)
+# ax2.set_title('Phenotype')
+# #plt.show()
+#
+#
+# plt.subplots(figsize=(10, 10))
+# sns.set(font_scale=1.4)
+# plt.title("Activity at 46.23 uM", fontsize=25)
+# sns.boxplot(y="Activity at 46.23 uM",
+#             data=dataframe, palette="Set3")
+# plt.show()
+#
+# plt.subplots(figsize=(10, 10))
+# sns.set(font_scale=1.4)
+# plt.title("Activity at 0.00299 uM", fontsize=25)
+# sns.boxplot(y="Activity at 0.00299 uM",
+#             data=dataframe, palette="Set3")
+# plt.show()
+#
+# plt.subplots(figsize=(10, 10))
+# sns.set(font_scale=1.4)
+# plt.title("Activity at 0.363 uM", fontsize=25)
+# sns.boxplot(y="Activity at 0.363 uM",
+#             data=dataframe, palette="Set3")
+# plt.show()
+#
+# plt.subplots(figsize=(10, 10))
+# sns.set(font_scale=1.4)
+# plt.title("Activity at 9.037 uM", fontsize=25)
+# sns.boxplot(y="Activity at 9.037 uM",
+#             data=dataframe, palette="Set3")
+# plt.show()
+#
+# plt.subplots(figsize=(10, 10))
+# sns.set(font_scale=1.4)
+# plt.title("Activity at 1.849 uM", fontsize=25)
+# sns.boxplot(y="Activity at 1.849 uM",
+#             data=dataframe, palette="Set3")
+# plt.show()
+#
+#
+# def standardize(dataset, id_field, mols_field, class_field):
+#     loader = CSVLoader(dataset,
+#                        id_field=id_field,
+#                        mols_field=mols_field,
+#                        labels_fields=class_field)
+#
+#     dataset = loader.create_dataset()
+#
+#     standardisation_params = {
+#         'REMOVE_ISOTOPE': True,
+#         'NEUTRALISE_CHARGE': True,
+#         'REMOVE_STEREO': False,
+#         'KEEP_BIGGEST': True,
+#         'ADD_HYDROGEN': False,
+#         'KEKULIZE': True,
+#         'NEUTRALISE_CHARGE_LATE': True}
+#
+#     CustomStandardizer(params=standardisation_params).standardize(dataset)
+#
+#     return dataset
+#
+#
+# dataframe = standardize(file, "PUBCHEM_CID", "smiles", "PUBCHEM_ACTIVITY_OUTCOME")
 
 # BOXPLOT actividades
 """
@@ -157,4 +168,26 @@ ax8.set_title('Activity at 46.23 uM')
 
 
 
+### REUNIAO
+
+# tSNE, Kmeans, PCA
+# ativa, inativa
+# justificar features que usamos para treinar modelos
+# activity outcome - class binaria
+# listar as feats que nao tem NAs
+# multiclass atraves dos valores de atividades
+
+# limpar todas as colunas que tenham NAs (testar)
+
+# obter features atraves dos SMILES
+
+# selecionar as moleculas ativas e usar a label de potencia como inibidor (e.g.)
+
+
+# PRE PROCESSAMENTO
+# manter tudo para analisar o dataset
+# segundo dataset com limpeza de NAs
+# terceiro dataset so com moleculas ativas e ver por potencia
+
+# falar de um conjunto de features mais interessantes
 
