@@ -33,7 +33,8 @@ sys.path.append('src')
 descriptors = pd.read_csv('../dataset/binary_class/descriptors_fs.csv', sep=',')
 fingerprint = pd.read_csv('../dataset/binary_class/rdk_fs.csv', sep=',')
 
-Activity_Class = pd.read_csv('../dataset/TDP1_activity_dataset.csv', sep=',')
+Activity = pd.read_csv('../dataset/TDP1_activity_dataset.csv', sep=',')
+Activity_Class = copy.deepcopy(Activity)
 
 #%% md
 # MACHINE LEARNING
@@ -235,18 +236,142 @@ plt.show()
 #
 #
 # ##fazer descritores contra classe e comparar métodos de ML
-# Activity_Class_compare = copy.deepcopy(Activity_Class)
-# Activity_Class_compare.drop(axis=0, index=5182)
+#descriptors_data já existe
+Activity_Class_compare = copy.deepcopy(Activity_Class)
+Activity_Class_compare.drop(axis=0, index=5182)
+descriptors_class_label = Activity_Class_compare['Activity at 46.23 uM']
+
+data_train, data_test, label_train, label_test = train_test_split(descriptors_data, descriptors_class_label, test_size=0.3) # 70% training and 30% test
+
+#Scikit-Learn Random Forest
+print('Random Forest\n\n')
+rf = RandomForestClassifier()
+
+#cross validate model on the full dataset
+kfold = StratifiedKFold(n_splits=10, random_state=rand, shuffle=True)
+scores_scoring = cross_val_score(rf, X=data_train, y=label_train, cv=kfold, scoring='f1')
+print(scores_scoring)
+
+# model training - FIT
+rf.fit(data_train, label_train)
+
+# PREDICT
+cv_predict = rf.predict(X=data_test)
+
+cv_predict_prob = rf.predict_proba(X=data_test)
+
+#METRICS
+metrics(label_test, cv_predict, cv_predict_prob)
+
+#CONFUSION MATRIX
+plot_confusion_matrix(rf, data_test, label_test)
+plt.title("Random Forest - descriptors")
+plt.show()
+
+
+
+#Scikit-Learn SVM Classifier
+print('SVM\n\n')
+svm = SVC(C=1.6, kernel='linear', class_weight='balanced', probability=True, random_state=rand)
+
+#cross validate model on the full dataset
+kfold = StratifiedKFold(n_splits=10, random_state=rand, shuffle=True)
+scores_scoring = cross_val_score(svm, X=data_train, y=label_train, cv=kfold, scoring='f1')
+print(scores_scoring)
+
+# model training
+svm.fit(data_train, label_train)
+
+# PREDICT
+cv_predict = svm.predict(X=data_test)
+
+cv_predict_prob = svm.predict_proba(X=data_test)
+
+#METRICS
+metrics(label_test, cv_predict, cv_predict_prob)
+
+#CONFUSION MATRIX
+plot_confusion_matrix(svm, data_test, label_test)
+plt.title("SVM - descriptors")
+plt.show()
+
+
+
 #
-# descriptors_compare = copy.deepcopy(descriptors)
+# descriptors_compare = copy.deepcopy(descriptors) !TODO perguntar Tiago sobre esta nova label...
 # descriptors_compare.drop(labels="binary_class", axis=1)
 # descriptors_compare["Activity at 46.23 uM"] = Activity_Class_compare["Activity at 46.23 uM"] #TESTAR????
 #
-# ##fazer fingerprints contra classe e comparar métodos de ML
+# ##fazer fingerprints contra classe e comparar métodos de ML !TODO os fingerprints não perdem colunas correto?
+
+fingerprint_label_class = Activity_Class['Activity at 46.23 uM']
+
+data_train, data_test, label_train, label_test = train_test_split(fingerprint_data, fingerprint_label_class, test_size=0.3) # 70% training and 30% test
+
+#Scikit-Learn Random Forest
+print('Random Forest\n\n')
+rf = RandomForestClassifier()
+
+#cross validate model on the full dataset
+kfold = StratifiedKFold(n_splits=10, random_state=rand, shuffle=True)
+scores_scoring = cross_val_score(rf, X=data_train, y=label_train, cv=kfold, scoring='f1')
+print(scores_scoring)
+
+# model training - FIT
+rf.fit(data_train, label_train)
+
+# PREDICT
+cv_predict = rf.predict(X=data_test)
+
+cv_predict_prob = rf.predict_proba(X=data_test)
+
+#METRICS
+metrics(label_test, cv_predict, cv_predict_prob)
+
+#CONFUSION MATRIX
+plot_confusion_matrix(rf, data_test, label_test)
+plt.title("Random Forest - descriptors")
+plt.show()
+
+
+
+#Scikit-Learn SVM Classifier
+print('SVM\n\n')
+svm = SVC(C=1.6, kernel='linear', class_weight='balanced', probability=True, random_state=rand)
+
+#cross validate model on the full dataset
+kfold = StratifiedKFold(n_splits=10, random_state=rand, shuffle=True)
+scores_scoring = cross_val_score(svm, X=data_train, y=label_train, cv=kfold, scoring='f1')
+print(scores_scoring)
+
+# model training
+svm.fit(data_train, label_train)
+
+# PREDICT
+cv_predict = svm.predict(X=data_test)
+
+cv_predict_prob = svm.predict_proba(X=data_test)
+
+#METRICS
+metrics(label_test, cv_predict, cv_predict_prob)
+
+#CONFUSION MATRIX
+plot_confusion_matrix(svm, data_test, label_test)
+plt.title("SVM - descriptors")
+plt.show()
+
+
+
 #
 # ##fazer uma conclusão para saber qual o melhor para prever binário os fingerprints ou os descriptores
 #
 # ##junção de Activity at 46.23 uM a tabela dos descritores, atenção pois houve uma molécula removida dos descritores devido a NA's, por isso atenção na adição da coluna.
+
+Activity.drop(axis=0, index=5182)
+label = Activity['Activity ...']
+
+
+
 #
 # ##fazer então a partir dos descritores a previsão direta da Activity.
 #
