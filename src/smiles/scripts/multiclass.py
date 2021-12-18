@@ -78,17 +78,12 @@ print(dataset.columns)
 
 #%%
 dataset_1 = pd.DataFrame.copy(dataset)
-for i in dataset_1[:,'Activity at 46.23 uM']:
-    if -150<=i< -100:
-        dataset_1[i,'Activity at 46.23 uM'] = '0'
-    elif -100 <= i < -50:
-        dataset_1[i,'Activity at 46.23 uM'] = '1'
-    elif -50 <= i < 0:
-        dataset_1[i,'Activity at 46.23 uM'] = '2'
-    elif 0 <= i < 50:
-        dataset_1[i,'Activity at 46.23 uM'] = '3'
-    else:
-        print('Rafa is dumb')
+conditions = [(-150 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < -100),
+              (-100 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < -50),
+              (-50 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < 0),
+              (0 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < 50)]
+results = ["0", "1", "2", "3"]
+dataset_1['Activity at 46.23 uM'] = np.select(conditions, results)
 
 dataset_1.to_csv("../dataset/multiclass/activity_46_multiclass.csv")
 
@@ -167,10 +162,10 @@ descript_data.to_csv('../dataset/multiclass/descriptors_multiclass.csv', index=F
 # descript_data = pd.read_csv('../dataset/descriptors_binary.csv')
 #%%
 # separar o dataframe por atividade
-moldes_0 = descript_data[descript_data["Activity at 46.23 uM"] == 0]
-moldes_1 = descript_data[descript_data["Activity at 46.23 uM"] == 1]
-moldes_2 = descript_data[descript_data["Activity at 46.23 uM"] == 2]
-moldes_3 = descript_data[descript_data["Activity at 46.23 uM"] == 3]
+moldes_0 = descript_data[descript_data["Activity at 46.23 uM"] == "0"]
+moldes_1 = descript_data[descript_data["Activity at 46.23 uM"] == "1"]
+moldes_2 = descript_data[descript_data["Activity at 46.23 uM"] == "2"]
+moldes_3 = descript_data[descript_data["Activity at 46.23 uM"] == "3"]
 #%%
 moldes_0.describe()
 #%%
@@ -220,21 +215,21 @@ StandardScaler().fit_transform(dataset_des)
 ### Molecular Fingerprints
 
 #%%
-dataset_morgan = copy.deepcopy(dataset_finger)
+# dataset_morgan = copy.deepcopy(dataset_finger)
 dataset_rdk = copy.deepcopy(dataset_finger)
-dataset_macc = copy.deepcopy(dataset_finger)
+# dataset_macc = copy.deepcopy(dataset_finger)
 #%%
-MorganFingerprint().featurize(dataset_morgan)
+# MorganFingerprint().featurize(dataset_morgan)
 #%%
-print(dataset_morgan.X.shape)
+# print(dataset_morgan.X.shape)
 #%%
 RDKFingerprint().featurize(dataset_rdk)
 #%%
 print(dataset_rdk.X.shape)
 #%%
-MACCSkeysFingerprint().featurize(dataset_macc)
+# MACCSkeysFingerprint().featurize(dataset_macc)
 #%%
-print(dataset_macc.X.shape)
+# print(dataset_macc.X.shape)
 
 ## Feature Selection
 
@@ -252,31 +247,32 @@ for i in range(len(feat_selector.support_)):
         features.append(header[i])
 #%%
 descript_data = pd.DataFrame(X_filtered, columns=features)
+descript_data["Activity at 46.23 uM"] = dataset_des.y
 print(descript_data)
 #%%
 print(descript_data.shape)
 #%%
 ### Molecular Fingerprints
 
-dataset_morgan_fs = SelectPercentile(percentile=10).fit_transform(dataset_morgan.X, dataset_morgan.y)
-print(dataset_morgan_fs.shape)
+# dataset_morgan_fs = SelectPercentile(percentile=10).fit_transform(dataset_morgan.X, dataset_morgan.y)
+# print(dataset_morgan_fs.shape)
 #%%
 dataset_rdk_fs = SelectPercentile(percentile=10).fit_transform(dataset_rdk.X, dataset_rdk.y)
 print(dataset_rdk_fs.shape)
 #%%
-dataset_macc_fs = SelectPercentile(percentile=10).fit_transform(dataset_macc.X, dataset_macc.y)
-print(dataset_macc_fs.shape)
+# dataset_macc_fs = SelectPercentile(percentile=10).fit_transform(dataset_macc.X, dataset_macc.y)
+# print(dataset_macc_fs.shape)
 #%%
 descript_data.to_csv("../dataset/multiclass/descriptors_fs.csv", index=False)
 
-pd_morgan_fs = pd.DataFrame(dataset_morgan_fs)
-pd_morgan_fs['Activity at 46.23 uM'] = dataset_morgan.y
-pd_morgan_fs.to_csv("../dataset/multiclass/morgan_fs.csv", index=False)
+# pd_morgan_fs = pd.DataFrame(dataset_morgan_fs)
+# pd_morgan_fs['Activity at 46.23 uM'] = dataset_morgan.y
+# pd_morgan_fs.to_csv("../dataset/multiclass/morgan_fs.csv", index=False)
 
 pd_rdk_fs = pd.DataFrame(dataset_rdk_fs)
 pd_rdk_fs['Activity at 46.23 uM'] = dataset_rdk.y
 pd_rdk_fs.to_csv("../dataset/multiclass/rdk_fs.csv", index=False)
 
-pd_macc_fs = pd.DataFrame(dataset_macc_fs)
-pd_macc_fs['Activity at 46.23 uM'] = dataset_macc.y
-pd_macc_fs.to_csv("../dataset/multiclass/macc_fs.csv", index=False)
+# pd_macc_fs = pd.DataFrame(dataset_macc_fs)
+# pd_macc_fs['Activity at 46.23 uM'] = dataset_macc.y
+# pd_macc_fs.to_csv("../dataset/multiclass/macc_fs.csv", index=False)
