@@ -82,7 +82,7 @@ conditions = [(-150 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity
               (-100 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < -50),
               (-50 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < 0),
               (0 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity at 46.23 uM"] < 50)]
-results = ["0", "1", "2", "3"]
+results = [0, 1, 2, 3]
 dataset_1['Activity at 46.23 uM'] = np.select(conditions, results)
 
 dataset_1.to_csv("../dataset/multiclass/activity_46_multiclass.csv")

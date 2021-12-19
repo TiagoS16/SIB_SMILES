@@ -19,12 +19,12 @@ rand = random.randrange(2147483647)
 print(rand)
 
 
-def metrics(label_test, predict, predict_prob=None, n_label=None):
+def metrics(label_test, predict):
+    print('METRICS:')
     print(f"Accuracy score:\n{accuracy_score(label_test, predict)}\n")
     print(f"Recall score:\n{recall_score(label_test, predict, average='weighted')}\n")
     print(f"Precison score:\n{precision_score(label_test, predict, average='weighted', zero_division=0)}\n")
     print(f"F1-score:\n{f1_score(label_test, predict, average='weighted')}\n")
-    # print(f"ROC AUC score:\n{roc_auc_score(label_test, predict_prob[:, 1], average='weighted')}\n")
     print(f"MCC score:\n{matthews_corrcoef(label_test, predict)}\n")
     print(f"Confusion matrix:\n{confusion_matrix(label_test, predict)}\n")
     print(f"Classification report:\n{classification_report(label_test, predict, zero_division=True)}\n")
@@ -32,25 +32,48 @@ def metrics(label_test, predict, predict_prob=None, n_label=None):
     # plt.show()
 
 
-def ml(model, dataset, labels, rand=None):
+def ml(model, dataset, labels, param=None, rand=None):
     # SPLIT
     data_train, data_test, label_train, label_test = train_test_split(dataset, labels, test_size=0.3)
 
     # k-fold
-    kfold = StratifiedKFold(n_splits=5, random_state=rand, shuffle=True)
+    kfold = StratifiedKFold(n_splits=5, random_state=rand, shuffle=False)
     # Cross validation
     scores_scoring = cross_val_score(model, X=data_train, y=label_train, cv=kfold, scoring='accuracy')
-    print(f'Cross Validation accuracy score: {np.mean(scores_scoring)}')
+    print(f'Cross Validation accuracy score: {np.mean(scores_scoring)}\n')
 
     # model training - FIT
     model.fit(data_train, label_train)
 
     # PREDICT
     predict = model.predict(X=data_test)
-    predict_prob = model.predict_proba(X=data_test)
+    base_model = accuracy_score(label_test, predict)
+    print('Base Model Accuracy: {:.3f}\n'.format(base_model))
+
+    if param != None:
+        ## OPTIMIZATION
+        search = HalvingGridSearchCV(estimator=model, param_grid=param, cv=kfold, scoring='accuracy', random_state=rand,
+                                     n_jobs=-1)
+        # search = HalvingRandomSearchCV(estimator=model, param_distributions=param, cv=kfold, scoring='accuracy',
+        #                                random_state=rand, n_jobs=-1)
+        search.fit(X=data_train, y=label_train)
+
+        best_params = search.best_params_
+        print(f'{best_params}\n')
+        # OPTI MODEL FITTED
+        best_model = search.best_estimator_
+        predict_opt = best_model.predict(X=data_test)
+        opt_model = accuracy_score(label_test, predict_opt)
+        print('Optimized Model Accuracy: {:.3f}\n'.format(opt_model))
+
+        improv = ((opt_model-base_model)/base_model*100)
+        print('Optimized model improved {:.3f}% over base model.\n'.format(improv))
+
+        if improv >= 0:
+            predict = predict_opt
 
     # Metrics
-    metrics(label_test, predict, predict_prob)
+    metrics(label_test, predict)
 
 
 ## BINARY ##
@@ -68,39 +91,24 @@ rf = RandomForestClassifier(n_jobs=-1)
 nb = GaussianNB()
 knn = KNeighborsClassifier(n_jobs=-1)
 voting = VotingClassifier(estimators=[('Random Forest', rf), ('Naive Bayes', nb), ('KNN', knn)], voting='soft', n_jobs=-1)
-nn = MLPClassifier()
+nn = MLPClassifier(early_stopping=True)
 models = [rf, nb, knn, voting, nn]
 
-# Descriptors
-print('DESCRIPTORS')
-for model in models:
-    print(model)
-    # ml(model, descriptors_data, descriptors_label)
-
-# Fingerprints
-print('FINGERPRINTS')
-for model in models:
-    print(model)
-    # ml(model, fingerprint_data, fingerprint_label)
-
-
-def opti(model, param, rand=None):
-    data_train, data_test, label_train, label_test = train_test_split(descriptors_data, descriptors_label, test_size=0.3)
-
-    kfold = StratifiedKFold(n_splits=5, random_state=rand, shuffle=False)
-    # search = HalvingGridSearchCV(estimator=model, param_grid=param, cv=kfold, scoring='accuracy', random_state=rand,
-    #                              verbose=1, n_jobs=-1)
-    search = HalvingRandomSearchCV(estimator=model, param_distributions=param, cv=kfold, scoring='accuracy',
-                                   random_state=rand, verbose=1, n_jobs=-1)
-    search.fit(X=data_train, y=label_train)
-
-    best_model = search.best_estimator_
-    print(best_model)
-    predict = best_model.predict(X=data_test)
-    metrics(label_test, predict)
-
+# PARAMETERS
 params_rf = {'n_estimators': range(10, 211, 50), 'criterion': ['entropy', 'gini'], 'max_features': ['sqrt', 'log2', None],
           'bootstrap': [True, False]}
 params_knn = {'n_neighbors': range(2, 11, 2), 'weights': ['distance', 'uniform'], 'leaf_size': range(10, 50, 10), 'p': [1, 2]}
-opti(knn, params_knn)
+params_nn = {'activation': ['identity', 'logistic', 'tanh', 'relu'], 'learning_rate': ['constant', 'invscaling', 'adaptive']}
+params = [params_rf, None, params_knn, None, params_nn]
 
+# Descriptors
+print('DESCRIPTORS')
+for i in range(len(models)):
+    print(models[i])
+    ml(models[i], descriptors_data, descriptors_label, params[i])
+
+# Fingerprints
+print('FINGERPRINTS')
+for i in range(len(models)):
+    print(models[i])
+    ml(models[i], fingerprint_data, fingerprint_label, params[i])
