@@ -85,15 +85,15 @@ conditions = [(-150 <= dataset_1["Activity at 46.23 uM"]) & (dataset_1["Activity
 results = [0, 1, 2, 3]
 dataset_1['Activity at 46.23 uM'] = np.select(conditions, results)
 
-dataset_1.to_csv("../dataset/multiclass/activity_46_multiclass.csv")
+dataset_1.to_csv("../dataset/multiclass/activity_46_multiclass.csv", index=False)
 
 ## Graphic Exploration
 ## realizr pie chart para ver a igualdade das classes, se estão bem distribuidas ou não
 class_activity = dataset_1.groupby('Activity at 46.23 uM').size()
-class_labels_activity = dataset_1.groupby('Activity at 46.23 uM').size().index()
+# class_labels_activity = dataset_1.groupby('Activity at 46.23 uM').size().index()
 
 fig, (ax1) = plt.subplots(1, figsize=(15, 5))
-ax1.pie(class_activity, labels=class_labels_activity, autopct='%1.1f%%', startangle=90)
+ax1.pie(class_activity, labels=results, autopct='%1.1f%%', startangle=90)
 ax1.set_title('Activity Classes')
 dataset_1 = None
 
@@ -104,8 +104,8 @@ def standardize(dataset, id_field ,mols_field,class_field):
 
     loader = CSVLoader(dataset,
                        id_field=id_field,
-                       mols_field = mols_field,
-                       labels_fields = class_field)
+                       mols_field=mols_field,
+                       labels_fields=class_field)
 
     dataset = loader.create_dataset()
 
@@ -162,10 +162,10 @@ descript_data.to_csv('../dataset/multiclass/descriptors_multiclass.csv', index=F
 # descript_data = pd.read_csv('../dataset/descriptors_binary.csv')
 #%%
 # separar o dataframe por atividade
-moldes_0 = descript_data[descript_data["Activity at 46.23 uM"] == "0"]
-moldes_1 = descript_data[descript_data["Activity at 46.23 uM"] == "1"]
-moldes_2 = descript_data[descript_data["Activity at 46.23 uM"] == "2"]
-moldes_3 = descript_data[descript_data["Activity at 46.23 uM"] == "3"]
+moldes_0 = descript_data[descript_data["Activity at 46.23 uM"] == 0]
+moldes_1 = descript_data[descript_data["Activity at 46.23 uM"] == 1]
+moldes_2 = descript_data[descript_data["Activity at 46.23 uM"] == 2]
+moldes_3 = descript_data[descript_data["Activity at 46.23 uM"] == 3]
 #%%
 moldes_0.describe()
 #%%
