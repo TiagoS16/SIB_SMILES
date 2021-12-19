@@ -78,13 +78,13 @@ def ml(model, dataset, labels, param=None, rand=None):
 
 ## BINARY ##
 # LOAD DATA
-descriptors = pd.read_csv('../dataset/binary_class/descriptors_fs.csv', sep=',')
-fingerprint = pd.read_csv('../dataset/binary_class/rdk_fs.csv', sep=',')
+descriptors = pd.read_csv('../dataset/multiclass/descriptors_fs.csv', sep=',')
+fingerprint = pd.read_csv('../dataset/multiclass/rdk_fs.csv', sep=',')
 
-descriptors_data = descriptors.drop("activity", axis=1)
-descriptors_label = descriptors["activity"]
-fingerprint_data = fingerprint.drop("activity", axis=1)
-fingerprint_label = fingerprint["activity"]
+descriptors_data = descriptors.drop("Activity at 46.23 uM", axis=1)
+descriptors_label = descriptors["Activity at 46.23 uM"]
+fingerprint_data = fingerprint.drop("Activity at 46.23 uM", axis=1)
+fingerprint_label = fingerprint["Activity at 46.23 uM"]
 
 # MODELS
 rf = RandomForestClassifier(n_jobs=-1)
@@ -95,7 +95,7 @@ nn = MLPClassifier(early_stopping=True)
 models = [rf, nb, knn, voting, nn]
 
 # PARAMETERS
-params_rf = {'n_estimators': range(10, 211, 50), 'criterion': ['entropy', 'gini'], 'max_features': ['sqrt', 'log2', None],
+params_rf = {'n_estimators': range(75, 251, 25), 'criterion': ['entropy', 'gini'], 'max_features': ['sqrt', 'log2', None],
           'bootstrap': [True, False]}
 params_knn = {'n_neighbors': range(2, 11, 2), 'weights': ['distance', 'uniform'], 'leaf_size': range(10, 50, 10), 'p': [1, 2]}
 params_nn = {'activation': ['identity', 'logistic', 'tanh', 'relu'], 'learning_rate': ['constant', 'invscaling', 'adaptive']}
