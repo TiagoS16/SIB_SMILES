@@ -95,7 +95,7 @@ nn = MLPClassifier(early_stopping=True)
 models = [rf, nb, knn, voting, nn]
 
 # PARAMETERS
-params_rf = {'n_estimators': range(10, 211, 50), 'criterion': ['entropy', 'gini'], 'max_features': ['sqrt', 'log2', None],
+params_rf = {'n_estimators': range(75, 251, 25), 'criterion': ['entropy', 'gini'], 'max_features': ['sqrt', 'log2', None],
           'bootstrap': [True, False]}
 params_knn = {'n_neighbors': range(2, 11, 2), 'weights': ['distance', 'uniform'], 'leaf_size': range(10, 50, 10), 'p': [1, 2]}
 params_nn = {'activation': ['identity', 'logistic', 'tanh', 'relu'], 'learning_rate': ['constant', 'invscaling', 'adaptive']}
