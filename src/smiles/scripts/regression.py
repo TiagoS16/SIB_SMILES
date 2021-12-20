@@ -72,6 +72,8 @@ print(f"TOTAL: {dataset.isna().sum().sum()}")
 dataset = dataset.dropna(axis=1, how='all')
 dataset.drop(['PUBCHEM_ACTIVITY_URL', 'Compound QC'], axis=1)
 dataset = dataset[dataset['smiles'].notna()]
+dataset = dataset[dataset['Activity at 46.23 uM'].notna()]
+print(dataset['Activity at 46.23 uM'].isna().sum())
 
 print(dataset.shape)
 print(dataset.columns)
